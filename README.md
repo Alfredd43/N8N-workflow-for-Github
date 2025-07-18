@@ -1,7 +1,7 @@
 <h1 align="center">🤖 AutoGrow AI/ML GitHub Trends Workflow</h1>
 
 <p align="center">
-  <img src="workflow.png" alt="n8n Workflow Overview" width="700"/>
+  <img src="Workflow.png" alt="n8n Workflow Overview" width="700"/>
 </p>
 
 <p align="center">
