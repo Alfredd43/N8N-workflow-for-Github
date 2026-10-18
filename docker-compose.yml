@@ -1,0 +1,18 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    env_file: .env
+    environment:
+      # The workflow reads GITHUB_TOKEN / GEMINI_API_KEY via $env, which n8n blocks by default
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - GENERIC_TIMEZONE=${TZ:-UTC}
+      - TZ=${TZ:-UTC}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n-agent.json:/workflows/n8n-agent.json:ro
+
+volumes:
+  n8n_data:

@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Automated curation of trending AI, ML, and Data Science repositories from GitHub</b><br>
-  🚀 Dailyy digests | 📊 Category-aware summaries | 🔒 Token-safe workflow
+  🚀 Daily digests | 📊 Category-aware summaries | 🔒 Token-safe workflow
 </p>
 
 ---
@@ -20,7 +20,7 @@
 - ✅ Generates technical summaries using LLMs (Gemini API, etc.)
 - ✅ Outputs daily markdown digests for your community or team
 - ✅ Keeps your API keys and tokens safe (see .gitignore)
-- ✅ Runs on AWS EC2 using Docker for deployment and orchestration
+- ✅ Runs as an n8n workflow in Docker on AWS EC2
 
 To see the results, go to [https://github.com/drago-Codes/daily-ai-trends](https://github.com/drago-Codes/daily-ai-trends)
 
@@ -41,7 +41,7 @@ To see the results, go to [https://github.com/drago-Codes/daily-ai-trends](https
 
 | Layer         | Technology         |
 |---------------|-------------------|
-| ⚙ Workflow   | AWS EC2 + Docker  |
+| ⚙ Workflow   | n8n (Docker on AWS EC2) |
 | 🗃 Data Source | GitHub API         |
 | 🧠 AI Engine  | Gemini API (or swap for OpenAI, etc.) |
 | 📄 Output     | Markdown digests   |
@@ -64,38 +64,55 @@ To see the results, go to [https://github.com/drago-Codes/daily-ai-trends](https
 
 ### 🔧 Deploy on AWS EC2 with Docker
 
-1. Launch an AWS EC2 instance (Ubuntu recommended)
+1. Launch an AWS EC2 instance (Ubuntu recommended) and install Docker
 2. Clone this repository to your EC2 instance
-3. Set up your GitHub and Gemini API credentials in a .env file
-4. Build and run the workflow using Docker:
-   - `docker build -t github-trends-workflow .`
-   - `docker run --env-file .env github-trends-workflow`
-5. Adjust schedule, categories, or output as needed
-6. The workflow will run automatically or as scheduled
+3. Create your `.env` from the template and fill in your keys:
+   ```bash
+   cp .env.example .env
+   ```
+4. Start n8n:
+   ```bash
+   docker compose up -d
+   ```
+5. Import the workflow (or import `n8n-agent.json` from the n8n UI at `http://<host>:5678`):
+   ```bash
+   docker compose exec n8n n8n import:workflow --input=/workflows/n8n-agent.json
+   ```
+6. In n8n, attach your GitHub credential to the two **Create a file** nodes, then activate the workflow
+7. Adjust schedule, categories, or output as needed. It runs daily at 9:00 (`TZ` in `.env`)
+
+### ✅ Validate the workflow
+
+Before importing changes, check the export for broken connections, Code node syntax errors, and `{{ }}` values that n8n won't evaluate:
+
+```bash
+node scripts/validate-workflow.mjs
+```
 
 ### 🛡 Environment Variables & Security
 
 *Never commit secrets to your repo!*
 
-- All API tokens and keys are now loaded from a .env file (not tracked by git).
-- Example .env:
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_TOKEN` | ✅ | Used for GitHub search API requests |
+| `GEMINI_API_KEY` | ✅ | Gemini API key, sent as the `x-goog-api-key` header |
+| `GEMINI_MODEL` | | Defaults to `gemini-2.5-flash` |
+| `TZ` | | Timezone for the schedule trigger, defaults to `UTC` |
 
-GITHUB_TOKEN=your_github_token_here
-GEMINI_API_KEY=your_gemini_api_key_here
-
-- In configuration files, tokens are referenced as environment variables.
-- You can safely commit configuration files to GitHub—no secrets are exposed.
-- Add .env to your .gitignore (if not already).
+- All API tokens and keys are loaded from `.env`, which git ignores.
+- The workflow reads them with `$env`, so `docker-compose.yml` sets `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`.
+- The workflow export contains no secrets and is safe to commit.
 
 ---
 
 ## 📂 Project Structure
 
-- n8n-agent.json – workflow export (safe to commit, no secrets)
-- .env – API tokens and keys (never commit this)
-- .gitignore – excludes sensitive files and junk
-- README.md – this file
-- workflow.png – workflow diagram
-- goof – (unknown, user file)
+- `n8n-agent.json` – workflow export (safe to commit, no secrets)
+- `docker-compose.yml` – runs n8n with your `.env`
+- `.env.example` – template for `.env` (never commit the real one)
+- `scripts/validate-workflow.mjs` – sanity checks for the workflow export
+- `.gitignore` – excludes sensitive files and junk
+- `Workflow.png` – workflow diagram
 
 ---
