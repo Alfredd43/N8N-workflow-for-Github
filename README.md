@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Automated curation of trending AI, ML, and Data Science repositories from GitHub</b><br>
-  🚀 Daily digests | 📊 Category-aware summaries | 🔒 Token-safe workflow
+  🚀 Dailyy digests | 📊 Category-aware summaries | 🔒 Token-safe workflow
 </p>
 
 ---
